@@ -1,0 +1,102 @@
+@import 'tailwindcss';
+
+/*
+ * VOLTERRA brand tokens. Roles:
+ *   background  ink        page background
+ *   surface     carbon     alternate sections, cards · graphite: image frames, raised panels
+ *   border      line       hairlines and dividers
+ *   text        chrome     primary · silver: body · steel: secondary/muted, labels, disabled
+ *   accent      accent     the single brand red, used sparingly · accent-soft: focus, errors, highlights
+ * Radii: rounded-full for buttons/pills, rounded-2xl for imagery, rounded-xl for panels.
+ */
+@theme {
+  --color-ink: #0a0a0b;
+  --color-carbon: #111113;
+  --color-graphite: #1b1b1f;
+  --color-line: #26262b;
+  --color-steel: #8b8e95;
+  --color-silver: #c9ccd1;
+  --color-chrome: #eceef1;
+  --color-accent: #d4252b;
+  --color-accent-soft: #ff4a4f;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Archivo', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-sweep: sweep 9s var(--ease-luxe) infinite;
+  --animate-glow: glow 6s ease-in-out infinite;
+  --animate-eq: eq 1.2s ease-in-out infinite;
+  --animate-float: float 7s ease-in-out infinite;
+
+  @keyframes sweep {
+    0% { transform: translateX(-60%) skewX(-18deg); opacity: 0; }
+    20% { opacity: 1; }
+    60%, 100% { transform: translateX(160%) skewX(-18deg); opacity: 0; }
+  }
+  @keyframes float {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -8px; }
+  }
+  @keyframes eq {
+    0%, 100% { transform: scaleY(0.35); }
+    50% { transform: scaleY(1); }
+  }
+  @keyframes glow {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.08); }
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-ink);
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+  body {
+    @apply bg-ink font-sans text-silver antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  section[id] { scroll-margin-top: 4rem; }
+  /* Balanced headings, no orphaned words in body copy */
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+  ::selection { background: var(--color-accent); color: white; }
+  :focus-visible {
+    outline: 2px solid var(--color-accent-soft);
+    outline-offset: 3px;
+  }
+}
+
+@utility font-wide {
+  font-family: var(--font-display);
+  font-stretch: 125%;
+}
+
+@utility eyebrow {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+}
+
+/* House photographic grade: slightly cooler, deeper, less saturated, so mixed sources read as one shoot */
+@utility photo-grade {
+  filter: saturate(0.86) contrast(1.05) brightness(0.93);
+}
+
+@utility grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sweep, .animate-glow, .animate-ping, .animate-eq, .animate-float { animation: none; }
+}

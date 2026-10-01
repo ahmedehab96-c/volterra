@@ -1,0 +1,2 @@
+# Netlify: serve the SPA for every route (client-side router handles /models, /configure, …)
+/*    /index.html    200
