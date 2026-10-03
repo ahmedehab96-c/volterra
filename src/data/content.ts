@@ -1,3 +1,4 @@
+import { cars } from './cars'
 export const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Models', href: '/models' },
@@ -170,60 +171,40 @@ export type Model = {
   notes: { horsepower: string; torque: string; topSpeed: string; acceleration: string }
   /** Hue of the photographed paint; omitted for neutral paint (white), which cannot be recoloured */
   baseHue?: number
+  /** Paint ids offered for this car */
+  colors: string[]
   /** Fourth spec on the model tabs (drivetrain or range) */
   extra: { label: string; value: string }
   highlights: string[]
+  /** From the API when available: database id, optional .glb/.gltf and uploaded gallery */
+  apiId?: number
+  model3d?: string | null
+  gallery?: { exterior: string[]; interior: string[]; detail: string[] }
 }
 
-export const models: Model[] = [
-  {
-    id: 'x',
-    slug: 'volterra-x',
-    name: 'X',
-    tagline: 'The electric flagship',
-    description:
-      'Four motors, instant torque, and not a single drop of fuel. X is the quickest VOLTERRA we have ever built.',
-    image: '/assets/images/models/volterra-x.webp',
-    alt: 'Red and black hypercar with a horseshoe grille in a white studio',
-    price: 412000,
-    baseHue: 355,
-    performance: { horsepower: 1020, torque: 1400, topSpeed: 310, acceleration: 2.1 },
-    notes: { horsepower: 'Four motors, one per wheel', torque: 'Available from standstill', topSpeed: 'Electronically limited', acceleration: 'Quad-motor launch control' },
-    extra: { label: 'Range', value: '540 km' },
-    highlights: ['Quad-motor torque vectoring', '350 kW charging — 10–80% in 18 min', 'Synthesised acoustic signature'],
+/** The range, derived from the bilingual car data in ./cars (English values; Arabic comes through the dictionary) */
+export const models: Model[] = cars.map((c) => ({
+  id: c.id,
+  slug: c.slug,
+  name: c.name,
+  tagline: c.tagline.en,
+  description: c.description.en,
+  image: c.heroImage,
+  alt: c.alt.en,
+  price: c.price,
+  model3d: c.model3d,
+  colors: c.colors,
+  baseHue: c.baseHue,
+  performance: c.specs,
+  notes: {
+    horsepower: c.notes.horsepower.en,
+    torque: c.notes.torque.en,
+    topSpeed: c.notes.topSpeed.en,
+    acceleration: c.notes.acceleration.en,
   },
-  {
-    id: 'gt',
-    slug: 'volterra-gt',
-    name: 'GT',
-    tagline: 'The continent crosser',
-    description:
-      'Our grand tourer pairs the full 620 HP with adaptive air suspension and a cabin made for a thousand kilometres in a single sitting.',
-    image: '/assets/images/models/volterra-gt.webp',
-    alt: 'Orange grand-touring coupé with a carbon rear wing in a grey studio',
-    price: 289000,
-    baseHue: 24,
-    performance: { horsepower: 620, torque: 850, topSpeed: 320, acceleration: 3.2 },
-    notes: { horsepower: 'Twin-turbo 4.0L V8, electric boost', torque: 'From 2,200 to 6,000 rpm', topSpeed: 'Governed at the limit', acceleration: 'Launch control, torque vectoring' },
-    extra: { label: 'Drivetrain', value: 'AWD' },
-    highlights: ['Adaptive air suspension', 'Four-zone climate', '18-speaker reference audio'],
-  },
-  {
-    id: 's',
-    slug: 'volterra-s',
-    name: 'S',
-    tagline: 'Built for the circuit',
-    description:
-      'Two hundred kilograms lighter, with a fixed carbon aero package and a track-tuned chassis. Road legal, barely.',
-    image: '/assets/images/models/volterra-s.webp',
-    alt: 'White and black hypercar in a grey studio',
-    price: 364000,
-    performance: { horsepower: 710, torque: 800, topSpeed: 330, acceleration: 2.8 },
-    notes: { horsepower: 'Twin-turbo V8, track calibration', torque: 'From 3,000 to 6,500 rpm', topSpeed: 'With the fixed rear wing', acceleration: 'Launch control, track tyres' },
-    extra: { label: 'Drivetrain', value: 'RWD' },
-    highlights: ['Carbon ceramic brakes', 'Fixed rear wing — 410 kg downforce', 'FIA-spec roll structure'],
-  },
-]
+  extra: { label: c.extra.label.en, value: c.extra.value.en },
+  highlights: c.highlights.map((h) => h.en),
+}))
 
 /** Headline figures for the performance bars; gauges are scaled against the top of the range so models compare honestly */
 export const modelStats = ({ performance: p, notes: n }: Model): Stat[] => [

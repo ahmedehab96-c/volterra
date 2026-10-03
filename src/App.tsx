@@ -1,3 +1,4 @@
+import { useT } from './i18n'
 import { motion, MotionConfig } from 'framer-motion'
 import { lazy, Suspense, useEffect } from 'react'
 import { Footer } from './components/layout/Footer'
@@ -16,6 +17,8 @@ import { trackPageView } from './utils/analytics'
 const ModelsPage = lazy(() => import('./pages/ModelsPage').then((m) => ({ default: m.ModelsPage })))
 const ModelDetail = lazy(() => import('./pages/ModelDetail').then((m) => ({ default: m.ModelDetail })))
 const ConfigurePage = lazy(() => import('./pages/ConfigurePage').then((m) => ({ default: m.ConfigurePage })))
+// The admin is a separate app with its own shell; none of it loads on public pages
+const AdminApp = lazy(() => import('./admin/AdminApp'))
 
 function Route({ path }: { path: string }) {
   if (path === '/') return <Home />
@@ -27,6 +30,7 @@ function Route({ path }: { path: string }) {
 }
 
 export default function App() {
+  const t = useT()
   const path = usePath()
   useRouteScroll(path)
 
@@ -39,6 +43,24 @@ export default function App() {
     return () => document.removeEventListener('click', interceptLinks)
   }, [])
 
+  if (path === '/admin' || path.startsWith('/admin/'))
+    return (
+      // The admin is English-only, whatever the site language
+      <div lang="en" dir="ltr">
+        <ErrorBoundary fallback={<RouteError />}>
+          <Suspense
+            fallback={
+              <div className="grid min-h-svh place-items-center bg-ink">
+                <LoadingLine />
+              </div>
+            }
+          >
+            <AdminApp path={path} />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+    )
+
   return (
     // "user" disables transform/layout animations when prefers-reduced-motion is set
     <MotionConfig reducedMotion="user">
@@ -47,7 +69,7 @@ export default function App() {
         href="#main"
         className="sr-only z-[70] rounded-full bg-chrome px-5 py-3 text-sm text-ink focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
       >
-        Skip to content
+        {t('Skip to content')}
       </a>
       <Navbar />
       <main id="main" tabIndex={-1} className="outline-none">
@@ -73,22 +95,23 @@ export default function App() {
 
 /** Friendly page-level fallback, e.g. when a page fails to download on a flaky connection */
 function RouteError() {
+  const t = useT()
   return (
     <section id="top" className="grid min-h-[80svh] place-items-center bg-ink px-5 pt-24 text-center">
       <div>
-        <p className="eyebrow">Connection interrupted</p>
-        <h1 className="mt-6 font-wide text-[clamp(1.75rem,5vw,3.5rem)] leading-none font-bold tracking-[-0.03em] text-chrome uppercase">This page didn’t load</h1>
-        <p className="mx-auto mt-6 max-w-sm text-steel">Please check your connection and try again.</p>
+        <p className="eyebrow">{t('Connection interrupted')}</p>
+        <h1 className="mt-6 font-wide text-[clamp(1.75rem,5vw,3.5rem)] leading-none font-bold tracking-[-0.03em] text-chrome uppercase">{t('This page didn’t load')}</h1>
+        <p className="mx-auto mt-6 max-w-sm text-steel">{t('Please check your connection and try again.')}</p>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           <button
             type="button"
             onClick={() => location.reload()}
             className={buttonStyles()}
           >
-            Try again
+            {t('Try again')}
           </button>
           <Button href="/" variant="ghost" icon={false}>
-            Home
+            {t('Home')}
           </Button>
         </div>
       </div>

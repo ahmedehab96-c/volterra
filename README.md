@@ -10,6 +10,9 @@ VOLTERRA is a concept launch site for a fictional luxury performance-car marque.
 
 ## Features
 
+- **Bilingual, Arabic first**: Arabic (RTL) is the default, with an AR/EN toggle saved per browser. All copy, car data and forms are translated, with IBM Plex Sans Arabic for Arabic text.
+- **Interactive 3D cars**: when a `.glb` exists (`public/models/{slug}.glb`, `public/models/car.glb` or the API's `model_3d`), cards, model pages and the configurator show a 360° drag/touch viewer with idle auto-rotation. Otherwise they show the studio photo.
+
 - **Studio showcase**: each model is presented on a spotlight that fades into the dark page, with crossfades between models.
 - **Vehicle configurator** (`/configure`): four steps (exterior, wheels, interior, summary), live model preview, estimated price, selections saved across visits, and a validated request form.
 - **Cinematic scroll animations**: masked image reveals, parallax and line-by-line text reveals.
@@ -36,7 +39,8 @@ src/
   sections/           Page sections reused across routes (Hero, Performance, Design, Interior, Configurator, RequestForm, …)
   components/layout/  Navbar, Footer, Logo/Wordmark
   components/ui/      Reusable UI: Button, CarStage, CinematicBand, ParallaxImage, SmartImage, Reveal, StaggerText, Counter, Preloader, …
-  data/               content.ts: single source for copy, model specs and configurator options; images.ts: image size manifest
+  data/               cars.ts: the range (bilingual names, copy, specs, images, 3D path, colours); content.ts: site copy and options; images.ts: image size manifest
+  i18n/               Tiny local translator (Arabic dictionary keyed by English), RTL/LTR switching
   state/              Small external stores: car configuration (persisted) and intro state
   hooks/ utils/       useMediaQuery; analytics integration point
   router.ts           Minimal History API router (no dependency)
@@ -62,6 +66,29 @@ npm install
 npm run dev
 ```
 
+## API (optional)
+
+The site runs on local mock data by default. To connect the [Laravel API](../volterra-api), copy `.env.example` to `.env.local` and set `VITE_API_URL` (for example `http://127.0.0.1:8000/api`).
+
+- **Data:** `src/api/` reads the range (`GET /models`, `/models/{slug}`), saves builds (`POST /configurations`) and sends requests (`POST /inquiries`).
+- **Fallback:** local data renders first and API data replaces it when it arrives. If the API is unreachable, pages fall back to the local range and the form shows a friendly retry message.
+
+### Server pricing and 3D
+
+With the API connected, the server catalog (`GET /options`, `GET /models`) supplies option prices and availability, so inactive options are greyed out. The estimate comes from `POST /configurations/calculate`, and the local values are used only until it responds or when the API is offline.
+
+A model with a `model_3d` (`.glb`/`.gltf`) shows an interactive 3D viewer on its page and in the configurator. `@google/model-viewer` is lazy-loaded only in that case. Without a 3D file, or if loading fails, the studio photo is shown.
+
+## Admin
+
+`/admin` is a separate, lazy-loaded admin app. It uses none of the public site's chrome and is marked `noindex`. Staff with the `admin` or `editor` role sign in at `/admin/login` (Sanctum bearer token) to manage:
+
+- **Models:** create, edit, activate or deactivate, soft-delete, and manage the image gallery (upload, reorder, delete) and 3D path
+- **Configuration options:** paints, wheels and interiors, with prices and status
+- **Inquiries:** search, filter by status and model, view full details, update status, add internal notes
+
+The dashboard shows totals at a glance. The admin needs `VITE_API_URL`.
+
 ## Production
 
 ```bash
@@ -72,19 +99,22 @@ The output goes to `dist/`. `public/_redirects` provides the SPA fallback on Net
 
 ## Demo
 
-**Live:** https://volterra-showroom.netlify.app
+**Live:** https://volterra-showroom.netlify.app (static demo on local data)
+
+**Backend:** [ahmedehab96-c/volterra-api](https://github.com/ahmedehab96-c/volterra-api) (Laravel 13, MySQL, Sanctum)
 
 ## Screenshots
 
-| Hero | Performance |
-| ---- | ----------- |
-| ![Hero](docs/screenshots/01-hero.jpg) | ![Performance](docs/screenshots/02-performance.jpg) |
-| **Design** | **Models** |
-| ![Design](docs/screenshots/03-design.jpg) | ![Models](docs/screenshots/04-models.jpg) |
-| **Model details** | **Configurator** |
-| ![Model details](docs/screenshots/05-model-detail.jpg) | ![Configurator](docs/screenshots/06-configurator.jpg) |
-| **Final CTA** | **Mobile** |
-| ![Final CTA](docs/screenshots/07-final-cta.jpg) | ![Mobile](docs/screenshots/08-mobile-hero.jpg) |
+| Arabic (RTL) | English (LTR) |
+| ------------ | ------------- |
+| ![Hero, Arabic](docs/screenshots/01-hero-ar.jpg) | ![Hero, English](docs/screenshots/02-hero-en.jpg) |
+| ![Configurator, Arabic](docs/screenshots/06-configurator-ar.jpg) | ![Configurator, English](docs/screenshots/07-configurator-en.jpg) |
+| **Models** | **Model details** |
+| ![Models](docs/screenshots/04-models-ar.jpg) | ![Model details](docs/screenshots/05-model-detail-ar.jpg) |
+| **Performance** | **Mobile** |
+| ![Performance](docs/screenshots/03-performance-ar.jpg) | ![Mobile](docs/screenshots/08-mobile-ar.jpg) |
+| **Admin dashboard** | **Admin inquiry details** |
+| ![Admin dashboard](docs/screenshots/09-admin-dashboard.jpg) | ![Admin inquiry](docs/screenshots/10-admin-inquiry.jpg) |
 
 ## Credits
 

@@ -41,7 +41,7 @@ export function Button({ variant = 'primary', icon = true, className = '', child
     >
       {children}
       {icon && (
-        <ArrowRight aria-hidden className="size-4 transition-transform duration-500 ease-luxe group-hover:translate-x-1" />
+        <ArrowRight aria-hidden className="size-4 transition-transform duration-500 ease-luxe group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:-scale-x-100" />
       )}
     </a>
   )

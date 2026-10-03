@@ -1,3 +1,4 @@
+import { useT } from '../i18n'
 import { motion } from 'framer-motion'
 import { BrainCircuit, Gauge, PanelsTopLeft } from 'lucide-react'
 import type { PointerEvent } from 'react'
@@ -15,6 +16,7 @@ const trackPointer = (e: PointerEvent<HTMLElement>) => {
 }
 
 export function Technology() {
+  const t = useT()
   return (
     <section id="technology" className="relative overflow-hidden bg-ink py-28 md:py-40">
       <div
@@ -22,7 +24,7 @@ export function Technology() {
         aria-hidden
       />
       <div className="relative mx-auto max-w-[1440px] px-5 md:px-10">
-        <SectionHeading eyebrow="Technology" title="Intelligence you can feel" intro="Three systems, one purpose: more of you in every corner." />
+        <SectionHeading eyebrow={t('Technology')} title={t('Intelligence you can feel')} intro={t('Three systems, one purpose: more of you in every corner.')} />
 
         <div className="mt-16 grid gap-4 md:mt-24 lg:grid-cols-3 lg:gap-5">
           {technology.map((item, i) => {
@@ -47,13 +49,13 @@ export function Technology() {
                   </div>
 
                   <h3 className="mt-auto pt-16 font-wide text-2xl font-semibold tracking-[-0.01em] text-chrome uppercase md:text-[1.75rem]">
-                    {item.title}
+                    {t(item.title)}
                   </h3>
-                  <p className="mt-4 max-w-sm text-[0.9375rem] leading-relaxed text-steel">{item.body}</p>
+                  <p className="mt-4 max-w-sm text-[0.9375rem] leading-relaxed text-steel">{t(item.body)}</p>
 
                   <div className="mt-8 flex items-center gap-4">
                     <span className="h-px w-8 bg-accent transition-[width] duration-700 ease-luxe group-hover:w-16" aria-hidden />
-                    <span className="text-[0.6875rem] tracking-[0.2em] text-silver uppercase">{item.stat}</span>
+                    <span className="text-[0.6875rem] tracking-[0.2em] text-silver uppercase">{t(item.stat)}</span>
                   </div>
                 </motion.article>
               </Reveal>

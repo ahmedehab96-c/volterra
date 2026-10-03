@@ -45,7 +45,7 @@ export function CinematicBand({ id, image, alt, eyebrow, title, body, focus, swe
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-ink from-5% via-ink/45 via-45% to-ink/40" aria-hidden />
-        <div className="absolute inset-0 hidden bg-gradient-to-r from-ink/70 via-ink/20 via-50% to-transparent md:block" aria-hidden />
+        <div className="absolute inset-0 hidden bg-gradient-to-r rtl:bg-gradient-to-l from-ink/70 via-ink/20 via-50% to-transparent md:block" aria-hidden />
       </motion.div>
 
       <div className="relative mx-auto flex h-full max-w-[1440px] flex-col justify-end px-5 pb-16 md:px-10 md:pb-24">

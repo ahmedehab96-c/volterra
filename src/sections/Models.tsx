@@ -1,3 +1,4 @@
+import { useT } from '../i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { useState, type KeyboardEvent } from 'react'
@@ -10,6 +11,7 @@ import { SmartImage } from '../components/ui/SmartImage'
 const ease = [0.22, 1, 0.36, 1] as const
 
 export function Models() {
+  const t = useT()
   const [index, setIndex] = useState(0)
   const model = models[index]
 
@@ -25,9 +27,9 @@ export function Models() {
     <section id="models" className="relative overflow-hidden bg-ink py-28 md:py-40">
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
         <SectionHeading
-          eyebrow="The range"
-          title="Three answers to one question"
-          intro="How fast do you want to go — and how do you want to get there?"
+          eyebrow={t('The range')}
+          title={t('Three answers to one question')}
+          intro={t('How fast do you want to go — and how do you want to get there?')}
         />
 
         {/* Model tabs */}
@@ -44,7 +46,7 @@ export function Models() {
                   aria-controls={`panel-${m.id}`}
                   tabIndex={selected ? 0 : -1}
                   onClick={() => setIndex(i)}
-                  className="group relative pb-5 text-left"
+                  className="group relative pb-5 text-start"
                 >
                   <span className="block text-[0.625rem] tracking-[0.2em] text-steel uppercase md:text-[0.6875rem]">0{i + 1} — Volterra</span>
                   <span
@@ -54,7 +56,7 @@ export function Models() {
                   >
                     {m.name}
                   </span>
-                  <span className="mt-1 hidden text-sm text-steel md:block">{m.tagline}</span>
+                  <span className="mt-1 hidden text-sm text-steel md:block">{t(m.tagline)}</span>
                   {selected && (
                     <motion.span layoutId="model-underline" className="absolute inset-x-0 -bottom-px h-0.5 bg-accent" transition={{ duration: 0.6, ease }} />
                   )}
@@ -83,7 +85,7 @@ export function Models() {
               >
                 <SmartImage
                   src={model.image}
-                  alt={model.alt}
+                  alt={t(model.alt)}
                   className="size-full object-cover transition-transform duration-[1.4s] ease-luxe group-hover:scale-[1.04]"
                   sizes="(min-width: 1024px) 58vw, 100vw"
                 />
@@ -92,7 +94,7 @@ export function Models() {
             <AnimatePresence initial={false}>
               <motion.span
                 key={model.id}
-                className="pointer-events-none absolute -bottom-6 left-4 font-wide text-[clamp(5rem,14vw,11rem)] leading-none font-bold text-white/10 select-none"
+                className="pointer-events-none absolute -bottom-6 start-4 font-wide text-[clamp(5rem,14vw,11rem)] leading-none font-bold text-white/10 select-none"
                 initial={{ opacity: 0, x: 24 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -24 }}
@@ -114,7 +116,7 @@ export function Models() {
               transition={{ duration: 0.3 }}
             >
               <motion.p className="eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease }}>
-                VOLTERRA {model.name} — {model.tagline}
+                VOLTERRA {model.name} — {t(model.tagline)}
               </motion.p>
               <motion.p
                 className="mt-5 text-lg leading-relaxed text-silver"
@@ -122,20 +124,20 @@ export function Models() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.08, ease }}
               >
-                {model.description}
+                {t(model.description)}
               </motion.p>
 
               <dl className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line">
                 {modelSpecs(model).map((spec, i) => (
                   <motion.div
-                    key={spec.label}
+                    key={t(spec.label)}
                     className="bg-carbon p-5"
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.12 + i * 0.06, ease }}
                   >
-                    <dt className="text-[0.6875rem] tracking-[0.18em] text-steel uppercase">{spec.label}</dt>
-                    <dd className="mt-2 font-wide text-xl font-semibold text-chrome">{spec.value}</dd>
+                    <dt className="text-[0.6875rem] tracking-[0.18em] text-steel uppercase">{t(spec.label)}</dt>
+                    <dd className="mt-2 font-wide text-xl font-semibold text-chrome">{t(spec.value)}</dd>
                   </motion.div>
                 ))}
               </dl>
@@ -149,19 +151,19 @@ export function Models() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 + i * 0.06, ease }}
                   >
-                    <ArrowRight className="size-3.5 shrink-0 text-accent" aria-hidden />
-                    {h}
+                    <ArrowRight className="size-3.5 shrink-0 text-accent rtl:-scale-x-100" aria-hidden />
+                    {t(h)}
                   </motion.li>
                 ))}
               </ul>
 
               <div className="mt-10 flex flex-wrap items-center justify-between gap-5 border-t border-line pt-8 lg:mt-auto">
                 <p>
-                  <span className="block text-xs tracking-[0.18em] text-steel uppercase">From</span>
+                  <span className="block text-xs tracking-[0.18em] text-steel uppercase">{t('From')}</span>
                   <span className="font-wide text-2xl font-semibold text-chrome">{formatPrice(model.price)}</span>
                 </p>
                 <Button href={`/models/${model.slug}`} variant="ghost">
-                  Explore
+                  {t('Explore')}
                 </Button>
               </div>
             </motion.div>

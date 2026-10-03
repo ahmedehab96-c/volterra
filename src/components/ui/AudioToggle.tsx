@@ -1,3 +1,4 @@
+import { useT } from '../../i18n'
 import { useEffect, useRef, useState } from 'react'
 
 type Engine = { ctx: AudioContext; master: GainNode }
@@ -60,6 +61,7 @@ function createAmbience(): Engine | null {
 
 /** Ambient sound toggle. Always off on load; never starts without a click. */
 export function AudioToggle({ className = '' }: { className?: string }) {
+  const t = useT()
   const [on, setOn] = useState(false)
   const [supported] = useState(() => typeof window !== 'undefined' && !!(window.AudioContext ?? (window as unknown as { webkitAudioContext?: unknown }).webkitAudioContext))
   const engine = useRef<Engine | null>(null)
@@ -107,8 +109,8 @@ export function AudioToggle({ className = '' }: { className?: string }) {
       type="button"
       onClick={toggle}
       aria-pressed={on}
-      aria-label={on ? 'Mute ambient sound' : 'Play ambient sound'}
-      title={on ? 'Mute ambient sound' : 'Play ambient sound'}
+      aria-label={t(on ? 'Mute ambient sound' : 'Play ambient sound')}
+      title={t(on ? 'Mute ambient sound' : 'Play ambient sound')}
       className={`flex h-10 min-w-10 items-center justify-center gap-2.5 px-2 text-[0.6875rem] font-medium tracking-[0.22em] uppercase transition-colors duration-300 ${
         on ? 'text-chrome' : 'text-steel hover:text-chrome'
       } ${className}`}
@@ -123,7 +125,7 @@ export function AudioToggle({ className = '' }: { className?: string }) {
           />
         ))}
       </span>
-      <span className="hidden sm:inline">Sound</span>
+      <span className="hidden sm:inline">{t('Sound')}</span>
     </button>
   )
 }

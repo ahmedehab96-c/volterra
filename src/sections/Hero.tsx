@@ -1,16 +1,23 @@
+import { useT } from '../i18n'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import { useRef } from 'react'
 import { headlineStats, models } from '../data/content'
 
 const heroModel = models.find((m) => m.id === 'gt')!
+const heroShot = 'absolute inset-x-5 top-[72px] h-[30svh] md:inset-x-auto md:top-[11%] md:end-[3%] md:h-[76%] md:w-[44%]'
 import { Button } from '../components/ui/Button'
 import { StudioShot } from '../components/ui/StudioShot'
+import { Vehicle3D } from '../components/ui/Vehicle3D'
+import { useModel3D } from '../hooks/useModel3D'
+import { useCatalog } from '../hooks/usePricing'
 import { useIntroDone } from '../state/intro'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
 export function Hero() {
+  const t = useT()
+  const hero3d = useModel3D(heroModel.slug, useCatalog().model(heroModel.slug)?.model3d)
   const ref = useRef<HTMLElement>(null)
   const reduce = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
@@ -21,20 +28,25 @@ export function Hero() {
   const enter = <T,>(to: T) => (intro ? to : undefined)
 
   return (
-    <section ref={ref} id="top" className="relative h-[100svh] min-h-[640px] overflow-hidden bg-ink" aria-label="Introduction">
+    <section ref={ref} id="top" className="relative h-[100svh] min-h-[640px] overflow-hidden bg-ink" aria-label={t('Introduction')}>
       {/* Soft studio light behind the car, breathing slowly */}
       <div
-        className="pointer-events-none absolute top-[8%] left-1/2 h-[70%] w-[110%] -translate-x-1/2 animate-glow bg-[radial-gradient(closest-side,rgba(236,238,241,0.06),transparent)] md:left-[66%] md:w-[70%]"
+        className="pointer-events-none absolute top-[8%] left-1/2 h-[70%] w-[110%] -translate-x-1/2 animate-glow bg-[radial-gradient(closest-side,rgba(236,238,241,0.06),transparent)] md:left-[66%] md:w-[70%] rtl:md:left-[34%]"
         aria-hidden
       />
 
       {/* The hero car on its spotlight */}
-      <StudioShot
-        src={heroModel.image}
-        alt={heroModel.alt}
-        priority
-        className="absolute inset-x-5 top-[72px] h-[30svh] md:inset-x-auto md:top-[11%] md:right-[3%] md:h-[76%] md:w-[44%]"
-      />
+      {hero3d ? (
+        <Vehicle3D
+          src={hero3d}
+          poster={heroModel.image}
+          alt={`VOLTERRA ${heroModel.name}`}
+          className="absolute inset-x-0 top-[64px] z-[5] h-[38svh] md:inset-x-auto md:top-[8%] md:end-0 md:h-[80%] md:w-[52%]"
+          fallback={<StudioShot src={heroModel.image} alt={t(heroModel.alt)} priority className={heroShot} />}
+        />
+      ) : (
+        <StudioShot src={heroModel.image} alt={t(heroModel.alt)} priority className={heroShot} />
+      )}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-1/2 bg-gradient-to-t from-ink via-ink/70 to-transparent md:h-1/3" aria-hidden />
 
       {/* Light sweep and grain over the stage, never blocking drags */}
@@ -54,12 +66,12 @@ export function Hero() {
           transition={{ duration: 1, delay: 0.1, ease }}
         >
           <span className="h-px w-10 bg-accent" aria-hidden />
-          The new VOLTERRA GT
+          {t('The new VOLTERRA GT')}
         </motion.p>
 
         {/* Each line rises out of its own mask */}
-        <h1 aria-label="Drive the impossible" className="font-wide text-[clamp(2.5rem,4.6vw,5.5rem)] leading-[0.92] font-bold tracking-[-0.03em] text-chrome">
-          {['DRIVE', 'THE IMPOSSIBLE'].map((line, i) => (
+        <h1 aria-label={t('Drive the impossible')} className="font-wide text-[clamp(2.5rem,4.6vw,5.5rem)] leading-[0.92] font-bold tracking-[-0.03em] text-chrome">
+          {[t('DRIVE'), t('THE IMPOSSIBLE')].map((line, i) => (
             <span key={line} aria-hidden className="block overflow-hidden pb-[0.06em]">
               <motion.span
                 className="block"
@@ -79,7 +91,7 @@ export function Hero() {
           animate={enter({ opacity: 1, y: 0 })}
           transition={{ duration: 1, delay: 0.75, ease }}
         >
-          Precision engineered for those who refuse ordinary.
+          {t('Precision engineered for those who refuse ordinary.')}
         </motion.p>
 
         <motion.div
@@ -89,10 +101,10 @@ export function Hero() {
           transition={{ duration: 1, delay: 0.9, ease }}
         >
           <Button href="#design">
-            Explore vehicle
+            {t('Explore vehicle')}
           </Button>
           <Button href="/configure" variant="ghost" icon={false}>
-            Configure
+            {t('Configure')}
           </Button>
         </motion.div>
       </motion.div>
@@ -107,17 +119,17 @@ export function Hero() {
         <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-5 md:px-10">
           <dl className="flex gap-8 md:gap-14">
             {headlineStats.slice(0, 3).map((s) => (
-              <div key={s.label} className="flex flex-col-reverse">
-                <dt className="text-[0.625rem] tracking-[0.2em] text-steel uppercase">{s.label}</dt>
+              <div key={t(s.label)} className="flex flex-col-reverse">
+                <dt className="text-[0.625rem] tracking-[0.2em] text-steel uppercase">{t(s.label)}</dt>
                 <dd className="font-wide text-sm font-semibold text-chrome md:text-base">
                   {s.value}
-                  <span className="ml-1 text-steel">{s.unit}</span>
+                  <span className="ms-1 text-steel">{t(s.unit)}</span>
                 </dd>
               </div>
             ))}
           </dl>
           <a href="#performance" className="hidden items-center gap-3 text-xs tracking-[0.2em] text-steel uppercase hover:text-chrome sm:flex">
-            Scroll
+            {t('Scroll')}
             <motion.span
               animate={reduce ? undefined : { y: [0, 6, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}

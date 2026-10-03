@@ -19,8 +19,9 @@ const getPath = () => location.pathname.replace(/\/+$/, '') || '/'
 
 export const usePath = () => useSyncExternalStore(subscribe, getPath)
 
-export function navigate(to: string) {
-  history.pushState(null, '', to)
+export function navigate(to: string, { replace = false } = {}) {
+  if (replace) history.replaceState(null, '', to)
+  else history.pushState(null, '', to)
   emit()
 }
 

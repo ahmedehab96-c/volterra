@@ -1,3 +1,4 @@
+import { useT } from '../i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -10,6 +11,7 @@ type HotspotId = (typeof interiorHotspots)[number]['id']
 const ease = [0.22, 1, 0.36, 1] as const
 
 export function Interior() {
+  const t = useT()
   const [active, setActive] = useState<HotspotId | null>(null)
   const spot = interiorHotspots.find((h) => h.id === active)
   const toggle = (id: HotspotId) => setActive((cur) => (cur === id ? null : id))
@@ -24,7 +26,7 @@ export function Interior() {
   return (
     <section id="interior" className="relative bg-carbon py-28 md:py-40">
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
-        <SectionHeading eyebrow="Interior" title="A cockpit, not a cabin" intro="Select a point to look closer." />
+        <SectionHeading eyebrow={t('Interior')} title={t('A cockpit, not a cabin')} intro={t('Select a point to look closer.')} />
 
         <Reveal className="mt-16 md:mt-24">
           {/* Frame keeps the photo's own 16:9 ratio so hotspots stay anchored at every width */}
@@ -49,7 +51,7 @@ export function Interior() {
                   onClick={() => toggle(h.id)}
                   aria-expanded={on}
                   aria-controls="interior-panel"
-                  aria-label={`${h.index} ${h.title}`}
+                  aria-label={`${h.index} ${t(h.title)}`}
                   className="group absolute grid size-9 -translate-x-1/2 -translate-y-1/2 place-items-center md:size-11"
                   style={{ left: `${h.x}%`, top: `${h.y}%` }}
                 >
@@ -96,18 +98,19 @@ export function Interior() {
 
 /** Hotspot card content, shared with the exterior Anatomy section */
 export function PanelBody({ spot, onClose }: { spot: { index: string; title: string; body: string }; onClose: () => void }) {
+  const t = useT()
   return (
     <>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[0.625rem] tracking-[0.22em] text-accent">{spot.index}</p>
-          <h3 className="mt-2 font-wide text-base font-semibold tracking-[0.04em] text-chrome uppercase">{spot.title}</h3>
+          <h3 className="mt-2 font-wide text-base font-semibold tracking-[0.04em] text-chrome uppercase">{t(spot.title)}</h3>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close" className="-mt-1 -mr-1 grid size-8 place-items-center rounded-full text-steel transition-colors hover:text-chrome">
+        <button type="button" onClick={onClose} aria-label={t('Close')} className="-mt-1 -me-1 grid size-8 place-items-center rounded-full text-steel transition-colors hover:text-chrome">
           <X className="size-4" />
         </button>
       </div>
-      <p className="mt-3 text-sm leading-relaxed text-steel">{spot.body}</p>
+      <p className="mt-3 text-sm leading-relaxed text-steel">{t(spot.body)}</p>
     </>
   )
 }
@@ -116,6 +119,7 @@ type LegendSpot = { id: string; index: string; title: string; body: string }
 
 /** Numbered hotspot index (the primary control on touch screens, a legend on desktop) plus the inline card on phones. */
 export function HotspotLegend({ spots, active, onToggle, onClose }: { spots: readonly LegendSpot[]; active: string | null; onToggle: (id: string) => void; onClose: () => void }) {
+  const t = useT()
   const spot = spots.find((h) => h.id === active)
   return (
     <>
@@ -128,10 +132,10 @@ export function HotspotLegend({ spots, active, onToggle, onClose }: { spots: rea
               type="button"
               onClick={() => onToggle(h.id)}
               aria-expanded={on}
-              className={`min-h-12 border-t pt-4 text-left transition-colors duration-300 ${on ? 'border-accent text-chrome' : 'border-line text-steel hover:text-silver'}`}
+              className={`min-h-12 border-t pt-4 text-start transition-colors duration-300 ${on ? 'border-accent text-chrome' : 'border-line text-steel hover:text-silver'}`}
             >
               <span className="block text-[0.625rem] tracking-[0.2em]">{h.index}</span>
-              <span className="mt-1 block font-wide text-[0.6875rem] font-semibold tracking-[0.06em] uppercase sm:text-sm">{h.title}</span>
+              <span className="mt-1 block font-wide text-[0.6875rem] font-semibold tracking-[0.06em] uppercase sm:text-sm">{t(h.title)}</span>
             </button>
           )
         })}

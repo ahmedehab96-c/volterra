@@ -1,3 +1,4 @@
+import { useT } from '../i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { vehicleHotspots } from '../data/content'
@@ -10,6 +11,7 @@ type HotspotId = (typeof vehicleHotspots)[number]['id']
 const ease = [0.22, 1, 0.36, 1] as const
 
 export function Anatomy() {
+  const t = useT()
   const [active, setActive] = useState<HotspotId | null>(null)
   const spot = vehicleHotspots.find((h) => h.id === active)
   const toggle = (id: HotspotId) => setActive((cur) => (cur === id ? null : id))
@@ -24,7 +26,7 @@ export function Anatomy() {
   return (
     <section id="anatomy" className="relative bg-ink py-28 md:py-40">
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
-        <SectionHeading eyebrow="Anatomy" title="Engineered where it matters" intro="Select a point to look closer." />
+        <SectionHeading eyebrow={t('Anatomy')} title={t('Engineered where it matters')} intro={t('Select a point to look closer.')} />
 
         <Reveal className="mt-16 md:mt-24">
           {/* Keeps the photo's 16:9 ratio so hotspots stay anchored at every width */}
@@ -56,7 +58,7 @@ export function Anatomy() {
                   onClick={() => toggle(h.id)}
                   aria-expanded={on}
                   aria-controls="anatomy-panel"
-                  aria-label={`${h.index} ${h.title}`}
+                  aria-label={`${h.index} ${t(h.title)}`}
                   className="group absolute grid size-9 -translate-x-1/2 -translate-y-1/2 place-items-center md:size-11"
                   style={{ left: `${h.x}%`, top: `${h.y}%` }}
                 >

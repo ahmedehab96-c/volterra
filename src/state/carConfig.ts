@@ -23,9 +23,12 @@ function load(): CarConfig {
   }
 }
 
+// Each car offers its own paints; an unavailable choice falls back to the car's first paint
+const colorFor = (model: Model, color: CarColor) => (model.colors.includes(color.id) ? color : (carColors.find((c) => c.id === model.colors[0]) ?? carColors[0]))
+
 // A saved paint the restored model cannot wear falls back to its signature paint
 const restored = load()
-let state: CarConfig = { ...restored, color: restored.model.baseHue == null ? carColors[0] : restored.color }
+let state: CarConfig = { ...restored, color: colorFor(restored.model, restored.color) }
 const listeners = new Set<() => void>()
 
 const update = (patch: Partial<CarConfig>) => {
@@ -39,8 +42,6 @@ const update = (patch: Partial<CarConfig>) => {
   listeners.forEach((l) => l())
 }
 
-// Neutral (white) photographs cannot be recoloured, so those models keep their signature paint
-const colorFor = (model: Model, color: CarColor) => (model.baseHue == null ? carColors[0] : color)
 
 export const setModel = (id: string) => {
   const model = models.find((m) => m.id === id)

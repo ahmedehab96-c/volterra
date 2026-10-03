@@ -1,3 +1,4 @@
+import { useT } from '../i18n'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import { Button } from '../components/ui/Button'
@@ -13,6 +14,7 @@ export function FinalCta({
   cta = 'Build your Volterra',
   href = '/configure',
 }: FinalCtaProps) {
+  const t = useT()
   const ref = useRef<HTMLElement>(null)
   const reduce = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
@@ -30,24 +32,24 @@ export function FinalCta({
           sizes="100vw"
         />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/75 to-ink/20" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-ink via-ink/75 to-ink/20" aria-hidden />
       <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink" aria-hidden />
 
       <div className="relative mx-auto w-full max-w-[1440px] px-5 md:px-10">
         <Reveal>
           <p className="eyebrow mb-6 flex items-center gap-4">
             <span className="h-px w-10 bg-accent" aria-hidden />
-            {eyebrow}
+            {t(eyebrow)}
           </p>
         </Reveal>
         <StaggerText
           as="h2"
-          text={title}
+          text={t(title)}
           className="max-w-[14ch] font-wide text-[clamp(2.5rem,7vw,6.5rem)] leading-[0.95] font-bold tracking-[-0.03em] text-chrome"
         />
         <Reveal delay={0.25} className="mt-10">
           <Button href={href}>
-            {cta}
+            {t(cta)}
           </Button>
         </Reveal>
       </div>

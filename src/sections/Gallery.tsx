@@ -1,3 +1,4 @@
+import { useT } from '../i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Expand, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -12,6 +13,7 @@ const spanClass = {
 } as const
 
 export function Gallery() {
+  const t = useT()
   const [active, setActive] = useState<number | null>(null)
   const [direction, setDirection] = useState(0)
   const lastTrigger = useRef<HTMLButtonElement | null>(null)
@@ -45,10 +47,10 @@ export function Gallery() {
     <section id="gallery" className="relative bg-carbon py-28 md:py-40">
       <div className="mx-auto max-w-[1440px] px-5 md:px-10">
         <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
-          <SectionHeading eyebrow="Gallery" title="Seen in its element" />
+          <SectionHeading eyebrow={t('Gallery')} title={t('Seen in its element')} />
           <Reveal delay={0.2}>
             <p className="max-w-xs text-sm leading-relaxed text-steel">
-              From alpine passes to midnight garages. Select any frame to view it full screen.
+              {t('From alpine passes to midnight garages. Select any frame to view it full screen.')}
             </p>
           </Reveal>
         </div>
@@ -70,8 +72,8 @@ export function Gallery() {
                   setDirection(0)
                   setActive(i)
                 }}
-                className="group relative block size-full overflow-hidden rounded-xl bg-graphite text-left"
-                aria-label={`View ${img.caption} full screen`}
+                className="group relative block size-full overflow-hidden rounded-xl bg-graphite text-start"
+                aria-label={`View ${t(img.caption)} full screen`}
               >
                 <SmartImage
                   src={img.src}
@@ -82,7 +84,7 @@ export function Gallery() {
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/0 to-ink/0 opacity-70 transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-5">
                   <span className="translate-y-1 text-sm text-chrome transition-transform duration-500 ease-luxe group-hover:translate-y-0">
-                    {img.caption}
+                    {t(img.caption)}
                   </span>
                   <Expand className="size-4 text-chrome opacity-0 transition-opacity duration-500 group-hover:opacity-100" aria-hidden />
                 </div>
@@ -114,7 +116,7 @@ export function Gallery() {
                 onClick={close}
                 autoFocus
                 className="grid size-10 place-items-center rounded-full border border-white/15 text-chrome transition-colors hover:border-white/50"
-                aria-label="Close gallery"
+                aria-label={t('Close gallery')}
               >
                 <X className="size-4" />
               </button>

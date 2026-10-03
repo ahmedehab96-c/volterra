@@ -1,3 +1,4 @@
+import { useT } from '../../i18n'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { finishIntro } from '../../state/intro'
@@ -11,6 +12,7 @@ const windowLoaded = () =>
 
 /** Brand intro shown until fonts and the initial page assets are ready. Failures and slow assets never block. */
 export function Preloader() {
+  const t = useT()
   const [progress, setProgress] = useState(0)
   const [done, setDone] = useState(false)
 
@@ -46,7 +48,7 @@ export function Preloader() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           role="status"
-          aria-label="Loading experience"
+          aria-label={t('Loading experience')}
         >
           <div className="flex flex-col items-center gap-7">
             {/* Left padding balances the trailing letter-spacing so the mark sits optically centred */}
@@ -59,7 +61,7 @@ export function Preloader() {
                 transition={{ duration: 0.5, ease: 'easeOut' }}
               />
             </div>
-            <p className="eyebrow">Loading experience...</p>
+            <p className="eyebrow">{t('Loading experience...')}</p>
           </div>
         </motion.div>
       )}

@@ -1,24 +1,33 @@
+import { useT } from '../i18n'
 import { AnimatePresence, motion, useInView } from 'framer-motion'
 import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { formatPrice, interiorOptions, models, paintRotation, wheelOptions } from '../data/content'
-import { Button } from '../components/ui/Button'
 import { buttonStyles } from '../components/ui/buttonStyles'
 import { StudioShot } from '../components/ui/StudioShot'
+import { Vehicle3D } from '../components/ui/Vehicle3D'
+import { useModel3D } from '../hooks/useModel3D'
 import { StaggerText } from '../components/ui/StaggerText'
 import { useTitle } from '../router'
 import { AnimatedPrice, ColorPicker, OptionGroup } from '../sections/Configurator'
 import { RequestForm } from '../sections/RequestForm'
-import { configTotal, resetCarConfig, setInterior, setModel, setWheels, useCarConfig } from '../state/carConfig'
+import { resetCarConfig, setInterior, setModel, setWheels, useCarConfig } from '../state/carConfig'
+import { useCatalog, useEstimate } from '../hooks/usePricing'
+import { apiEnabled } from '../api/apiClient'
+import { saveConfiguration } from '../api/configurationsApi'
+import { Check } from 'lucide-react'
 
 const steps = ['Exterior color', 'Wheels', 'Interior', 'Summary'] as const
 const ease = [0.22, 1, 0.36, 1] as const
 
 export function ConfigurePage() {
-  useTitle('Configure — VOLTERRA', 'Build your VOLTERRA: choose a model, paint, wheels and interior, and see the estimated price.')
+  const t = useT()
+  useTitle(t('Configure — VOLTERRA'), t('Build your VOLTERRA: choose a model, paint, wheels and interior, and see the estimated price.'))
   const config = useCarConfig()
   const { model, color, wheels, interior } = config
-  const total = configTotal(config)
+  const total = useEstimate(config).price
+  const catalog = useCatalog()
+  const src3d = useModel3D(model.slug, catalog.model(model.slug)?.model3d)
   const [step, setStep] = useState(0)
   const panel = useRef<HTMLDivElement>(null)
   const panelInView = useInView(panel, { margin: '0px 0px -20% 0px' })
@@ -48,18 +57,18 @@ export function ConfigurePage() {
             <div>
               <p className="eyebrow mb-5 flex items-center gap-4">
                 <span className="h-px w-10 bg-accent" aria-hidden />
-                Configurator
+                {t('Configurator')}
               </p>
               <StaggerText
                 as="h1"
-                text="Build your VOLTERRA"
+                text={t('Build your VOLTERRA')}
                 immediate
                 className="font-wide text-[clamp(2rem,5vw,3.75rem)] leading-[1.02] font-semibold tracking-[-0.02em] text-chrome uppercase"
               />
             </div>
 
             {/* Model choice */}
-            <div role="radiogroup" aria-label="Model" className="flex rounded-full border border-line p-1" onKeyDown={onModelKey}>
+            <div role="radiogroup" aria-label={t('Model')} className="flex rounded-full border border-line p-1" onKeyDown={onModelKey}>
               {models.map((m) => {
                 const on = m.id === model.id
                 return (
@@ -85,7 +94,18 @@ export function ConfigurePage() {
             {/* Preview: the selected model, sticky beside the steps on desktop */}
             <div className="lg:sticky lg:top-28 lg:col-span-7 lg:self-start xl:col-span-8">
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-graphite sm:aspect-[16/10] lg:aspect-auto lg:h-[calc(100svh-10rem)] lg:max-h-[760px] lg:min-h-[420px]">
-                <StudioShot src={model.image} alt={model.alt} fill hue={paintRotation(model, color)} className="absolute inset-0" />
+                {src3d ? (
+                  <Vehicle3D
+                    src={src3d}
+                    poster={model.image}
+                    alt={`Interactive 3D VOLTERRA ${model.name}`}
+                    hue={paintRotation(model, color)}
+                    className="absolute inset-0"
+                    fallback={<StudioShot src={model.image} alt={t(model.alt)} fill hue={paintRotation(model, color)} className="absolute inset-0" />}
+                  />
+                ) : (
+                  <StudioShot src={model.image} alt={t(model.alt)} fill hue={paintRotation(model, color)} className="absolute inset-0" />
+                )}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" aria-hidden />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5 md:p-8" aria-live="polite">
                   <p className="eyebrow text-silver">VOLTERRA {model.name}</p>
@@ -98,7 +118,7 @@ export function ConfigurePage() {
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.4, ease }}
                     >
-                      {color.name}
+                      {t(color.name)}
                     </motion.p>
                   </AnimatePresence>
                 </div>
@@ -114,10 +134,10 @@ export function ConfigurePage() {
                       type="button"
                       onClick={() => setStep(i)}
                       aria-current={i === step ? 'step' : undefined}
-                      className={`relative w-full pb-4 text-left transition-colors duration-300 ${i === step ? 'text-chrome' : 'text-steel hover:text-silver'}`}
+                      className={`relative w-full pb-4 text-start transition-colors duration-300 ${i === step ? 'text-chrome' : 'text-steel hover:text-silver'}`}
                     >
                       <span className="block text-[0.625rem] tracking-[0.2em]">0{i + 1}</span>
-                      <span className="mt-1 block truncate text-[0.625rem] font-medium tracking-[0.12em] uppercase sm:text-[0.6875rem]">{label.split(' ')[0]}</span>
+                      <span className="mt-1 block truncate text-[0.625rem] font-medium tracking-[0.12em] uppercase sm:text-[0.6875rem]">{t(label === 'Exterior color' ? 'Exterior' : label)}</span>
                       {i === step && <motion.span layoutId="step-underline" className="absolute inset-x-0 -bottom-px h-0.5 bg-accent" transition={{ duration: 0.5, ease }} />}
                     </button>
                   </li>
@@ -126,7 +146,7 @@ export function ConfigurePage() {
 
               <div className="mt-8 flex items-center justify-between">
                 <h2 className="font-wide text-sm font-semibold tracking-[0.12em] text-chrome uppercase">
-                  <span className="text-accent">0{step + 1}</span> — {steps[step]}
+                  <span className="text-accent">0{step + 1}</span> — {t(steps[step])}
                 </h2>
                 <button
                   type="button"
@@ -134,7 +154,7 @@ export function ConfigurePage() {
                   className="group inline-flex h-9 items-center gap-2 rounded-full border border-white/10 px-4 text-[0.6875rem] tracking-[0.18em] text-steel uppercase transition-colors hover:border-white/40 hover:text-chrome"
                 >
                   <RotateCcw className="size-3.5 transition-transform duration-500 group-hover:-rotate-180" aria-hidden />
-                  Reset
+                  {t('Reset')}
                 </button>
               </div>
 
@@ -148,22 +168,22 @@ export function ConfigurePage() {
                   transition={{ duration: 0.35, ease }}
                 >
                   {step === 0 && <ColorPicker />}
-                  {step === 1 && <OptionGroup legend="Wheels" name="wheels" options={wheelOptions} value={wheels} onChange={setWheels} />}
-                  {step === 2 && <OptionGroup legend="Interior" name="interior" options={interiorOptions} value={interior} onChange={setInterior} />}
+                  {step === 1 && <OptionGroup legend={t('Wheels')} name="wheels" options={wheelOptions} value={wheels} onChange={setWheels} />}
+                  {step === 2 && <OptionGroup legend={t('Interior')} name="interior" options={interiorOptions} value={interior} onChange={setInterior} />}
                   {step === 3 && (
                     <dl className="space-y-4 text-sm">
                       {[
-                        ['Model', `VOLTERRA ${model.name}`, model.price],
-                        ['Exterior', color.name, color.price],
-                        ['Wheels', `${wheels.name} — ${wheels.detail}`, wheels.price],
-                        ['Interior', `${interior.name} — ${interior.detail}`, interior.price],
+                        ['Model', `VOLTERRA ${model.name}`, catalog.model(model.slug)?.price ?? model.price],
+                        ['Exterior', color.name, catalog.optionPrice('exterior_color', color.id, color.price)],
+                        ['Wheels', `${t(wheels.name)} — ${t(wheels.detail)}`, catalog.optionPrice('wheels', wheels.id, wheels.price)],
+                        ['Interior', `${t(interior.name)} — ${t(interior.detail)}`, catalog.optionPrice('interior', interior.id, interior.price)],
                       ].map(([label, value, price]) => (
                         <div key={label} className="flex items-baseline justify-between gap-4 border-b border-line pb-4">
                           <div>
-                            <dt className="text-[0.625rem] tracking-[0.2em] text-steel uppercase">{label}</dt>
+                            <dt className="text-[0.625rem] tracking-[0.2em] text-steel uppercase">{t(String(label))}</dt>
                             <dd className="mt-1 text-chrome">{value}</dd>
                           </div>
-                          <dd className="shrink-0 text-steel">{label === 'Model' ? formatPrice(price as number) : price ? `+${formatPrice(price as number)}` : 'Included'}</dd>
+                          <dd className="shrink-0 text-steel">{label === 'Model' ? formatPrice(price as number) : price ? `+${formatPrice(price as number)}` : t('Included')}</dd>
                         </div>
                       ))}
                     </dl>
@@ -172,23 +192,19 @@ export function ConfigurePage() {
               </AnimatePresence>
 
               <div className="mt-10 border-t border-line pt-6">
-                <p className="eyebrow">Estimated configuration</p>
+                <p className="eyebrow">{t('Estimated configuration')}</p>
                 <p className="mt-2 font-wide text-3xl font-semibold text-chrome">
                   <AnimatedPrice value={total} />
                 </p>
-                <p className="mt-2 text-xs text-steel">Indicative price before taxes and delivery. No payment is taken online.</p>
+                <p className="mt-2 text-xs text-steel">{t('Indicative price before taxes and delivery. No payment is taken online.')}</p>
               </div>
 
-              {step === steps.length - 1 ? (
-                <Button href="#request" className="mt-8 w-full">
-                  Request your Volterra
-                </Button>
-              ) : null}
+              {step === steps.length - 1 ? <SaveBuild /> : null}
 
               {/* Desktop step controls; phones use the bottom bar */}
               <div className="mt-8 hidden gap-3 lg:flex">
                 <StepButton dir={-1} disabled={step === 0} onClick={() => go(-1)} />
-                {step < steps.length - 1 && <StepButton dir={1} onClick={() => go(1)} label={`Next: ${steps[step + 1]}`} />}
+                {step < steps.length - 1 && <StepButton dir={1} onClick={() => go(1)} label={t('Next: {step}', { step: t(steps[step + 1]) })} />}
               </div>
             </div>
           </div>
@@ -210,7 +226,7 @@ export function ConfigurePage() {
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[0.625rem] tracking-[0.2em] text-steel uppercase">
-                  Step 0{step + 1} / 0{steps.length}
+                  {t('Step {n} / {total}', { n: `0${step + 1}`, total: `0${steps.length}` })}
                 </p>
                 <p className="truncate font-wide text-base font-semibold text-chrome">
                   <AnimatedPrice value={total} />
@@ -222,7 +238,7 @@ export function ConfigurePage() {
                   <StepButton dir={1} onClick={() => go(1)} compact />
                 ) : (
                   <a href="#request" className={buttonStyles('primary', 'sm')}>
-                    Request
+                    {t('Request')}
                   </a>
                 )}
               </div>
@@ -236,7 +252,8 @@ export function ConfigurePage() {
 
 function StepButton({ dir, onClick, disabled, label, compact }: { dir: -1 | 1; onClick: () => void; disabled?: boolean; label?: string; compact?: boolean }) {
   const Icon = dir < 0 ? ArrowLeft : ArrowRight
-  const text = label ?? (dir < 0 ? 'Back' : 'Next')
+  const t = useT()
+  const text = label ?? t(dir < 0 ? 'Back' : 'Next')
   return (
     <button
       type="button"
@@ -247,9 +264,59 @@ function StepButton({ dir, onClick, disabled, label, compact }: { dir: -1 | 1; o
         compact ? 'w-11' : dir < 0 ? 'px-5' : 'flex-1 px-5'
       } ${dir > 0 ? 'border-chrome bg-chrome text-ink hover:bg-white' : 'border-white/20 text-chrome hover:border-white/60'}`}
     >
-      {dir < 0 && <Icon className="size-4 transition-transform duration-300 group-hover:-translate-x-0.5" aria-hidden />}
+      {dir < 0 && <Icon className="size-4 transition-transform duration-300 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 rtl:-scale-x-100" aria-hidden />}
       {!compact && text}
-      {dir > 0 && <Icon className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />}
+      {dir > 0 && <Icon className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 rtl:-scale-x-100" aria-hidden />}
     </button>
+  )
+}
+
+const toRequest = () => document.getElementById('request')?.scrollIntoView({ behavior: 'smooth' })
+
+/** Summary CTA: saves the build (POST /configurations) when the API is available, then moves on to the request form. */
+function SaveBuild() {
+  const t = useT()
+  const config = useCarConfig()
+  const [state, setState] = useState<{ status: 'idle' | 'saving' | 'saved' | 'error'; reference?: string }>({ status: 'idle' })
+
+  // Changing the build after saving invites a fresh save
+  const key = `${config.model.id}-${config.color.id}-${config.wheels.id}-${config.interior.id}`
+  const [savedKey, setSavedKey] = useState('')
+  const inFlight = useRef(false)
+  const current = state.status === 'saved' && savedKey !== key ? { status: 'idle' as const } : state
+
+  const onClick = () => {
+    if (inFlight.current) return
+    if (!apiEnabled) return toRequest()
+    inFlight.current = true
+    setState({ status: 'saving' })
+    saveConfiguration(config)
+      .finally(() => (inFlight.current = false))
+      .then((saved) => {
+        setSavedKey(key)
+        setState({ status: 'saved', reference: saved.reference })
+        window.setTimeout(toRequest, 900)
+      })
+      .catch(() => {
+        setState({ status: 'error' })
+        toRequest()
+      })
+  }
+
+  return (
+    <div className="mt-8">
+      <button type="button" onClick={onClick} disabled={current.status === 'saving'} className={`w-full ${buttonStyles()}`}>
+        {t(current.status === 'saving' ? 'Saving your build…' : 'Request your Volterra')}
+        {current.status !== 'saving' && <ArrowRight className="size-4 transition-transform duration-500 ease-luxe group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:-scale-x-100" aria-hidden />}
+      </button>
+      <div className="mt-3 min-h-5 text-xs" aria-live="polite">
+        {current.status === 'saved' && (
+          <p className="flex items-center gap-2 text-silver">
+            <Check className="size-3.5 text-accent" aria-hidden /> {t('Build saved · reference {ref}', { ref: current.reference ?? '' })}
+          </p>
+        )}
+        {current.status === 'error' && <p className="text-steel">{t('We couldn’t save your build right now — you can still send your request below.')}</p>}
+      </div>
+    </div>
   )
 }
